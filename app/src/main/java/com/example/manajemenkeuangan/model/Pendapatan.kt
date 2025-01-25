@@ -3,7 +3,17 @@ package com.example.manajemenkeuangan.model
 import kotlinx.serialization.Serializable
 
 
+@Serializable
+data class PendapatanResponse(
+    val status : Boolean,
+    val data: List<Pendapatan>
+)
 
+@Serializable
+data class PendapatanDetailResponse(
+    val status: Boolean,
+    val data: Pendapatan
+)
 
 @Serializable
 data class Pendapatan (
