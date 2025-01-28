@@ -35,6 +35,39 @@ object PenyediaViewModel {
             )
         }
 
+        //Pendapatan
+        initializer { HomePendapatanViewModel(manajemenUangApp().container.pendapatanRepository) }
+        initializer { PendapatanInsertViewModel(manajemenUangApp().container.pendapatanRepository) }
+        initializer { PendapatanDetailViewModel(createSavedStateHandle(), manajemenUangApp().container.pendapatanRepository) }
+        initializer {
+            PendapatanEditViewModel(
+                createSavedStateHandle(),
+                manajemenUangApp().container.pendapatanRepository,
+                HomeAsetViewModel(manajemenUangApp().container.asetRepository),
+                HomeKategoriViewModel(manajemenUangApp().container.kategoriRepository)
+            )
+        }
+
+
+
+        //Aset
+        initializer { HomeAsetViewModel(manajemenUangApp().container.asetRepository) }
+        initializer { AsetInsertViewModel(manajemenUangApp().container.asetRepository) }
+        initializer { AsetDetailViewModel(createSavedStateHandle(), manajemenUangApp().container.asetRepository) }
+        initializer { AsetEditViewModel(createSavedStateHandle(), manajemenUangApp().container.asetRepository) }
+
+        //Pengeluaran
+        initializer { PengeluaranHomeViewModel(manajemenUangApp().container.pengeluaranRepository , manajemenUangApp().container.saldoRepository) }
+        initializer { PengeluaranDetailViewModel(createSavedStateHandle(), manajemenUangApp().container.pengeluaranRepository) }
+        initializer { PengeluaranEditViewModel(createSavedStateHandle(), manajemenUangApp().container.pengeluaranRepository) }
+        initializer { PengeluaranInsertViewModel(manajemenUangApp().container.pengeluaranRepository) }
+
+        //Kategori
+        initializer { HomeKategoriViewModel(manajemenUangApp().container.kategoriRepository) }
+        initializer { KategoriInsertViewModel(manajemenUangApp().container.kategoriRepository) }
+        initializer { KategoriDetailViewModel(createSavedStateHandle(), manajemenUangApp().container.kategoriRepository) }
+        initializer { KategoriEditViewModel(createSavedStateHandle(), manajemenUangApp().container.kategoriRepository) }
+
     }
 }
 
