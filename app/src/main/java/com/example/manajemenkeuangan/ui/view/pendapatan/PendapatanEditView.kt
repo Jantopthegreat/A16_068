@@ -1,0 +1,118 @@
+package com.example.manajemenkeuangan.ui.view.pendapatan
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.manajemenkeuangan.ui.customwidget.TopAppBar
+import com.example.manajemenkeuangan.ui.navigation.DestinasiNavigasi
+import com.example.manajemenkeuangan.ui.viewmodel.PenyediaViewModel
+import com.example.manajemenkeuangan.ui.viewmodel.aset.HomeAsetViewModel
+import com.example.manajemenkeuangan.ui.viewmodel.kategori.HomeKategoriViewModel
+import com.example.manajemenkeuangan.ui.viewmodel.pendapatan.PendapatanEditViewModel
+import kotlinx.coroutines.launch
+
+object DestinasiEditPendapatan : DestinasiNavigasi {
+    override val route = "edit_pendapatan"
+    override val titleRes = "Edit Pendapatan"
+    const val idPendapatan = "idPendapatan"
+    val routeWithArgs = "$route/{$idPendapatan}"
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PendapatanEditView(
+    navigateBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit,
+    viewModel: PendapatanEditViewModel = viewModel(factory = PenyediaViewModel.Factory),
+    asetViewModel: HomeAsetViewModel = viewModel(factory = PenyediaViewModel.Factory),
+    kategoriViewModel: HomeKategoriViewModel = viewModel(factory = PenyediaViewModel.Factory)
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    val asetUiState = asetViewModel.asetUiState
+    val selectedAset by remember { mutableStateOf(asetViewModel.selectedAsetName) }
+
+    val kategoriUiState = kategoriViewModel.kategoriUiState
+    val selectedKategori by remember { mutableStateOf(kategoriViewModel.selectedKategoriName) }
+
+    val datetimeState = remember { mutableStateOf("") }
+
+    Scaffold(
+        modifier = modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .fillMaxSize()
+            .padding(top = 18.dp),
+        topBar = {
+            TopAppBar(
+                onBack = onBack,
+                onLogoClick = {},
+                showBackButton = true,
+                judul = "Pendapatan Edit"
+            )
+        }
+    ) { innerPadding ->
+        EntryBody(
+            insertPndUiState = viewModel.uiStateEdit,
+            onPendapatanValueChange = viewModel::updateInsertPndState,
+            asetUiState = asetUiState,
+            selectedAset = asetViewModel.selectedAsetName,
+            onAsetSelected = { asetViewModel.selectAset(it) },
+            kategoriUiState = kategoriUiState,
+            selectedKategori = kategoriViewModel.selectedKategoriName,
+            onKategoriSelected = { kategoriViewModel.selectKategori(it) },
+            onSaveClick = {
+                coroutineScope.launch {
+                    viewModel.editPendapatan()
+                    navigateBack()
+                }
+            },
+            showDatePicker = showDatePicker,
+            onShowDatePickerChange = { showDatePicker = it },
+            modifier = modifier.padding(innerPadding),
+            showTimePicker = showDatePicker,
+            onShowTimePickerChange = { showDatePicker = it },
+            datetimeState = datetimeState // Pass datetime state
+
+        )
+    }
+
+    // Tampilkan DatePickerDialog saat showDatePicker = true
+    if (showDatePicker) {
+        DatePickerDialogWithCalendar(
+            onDateSelected = { selectedDate ->
+                // Menyimpan tanggal dan menampilkan TimePickerDialog
+                datetimeState.value = selectedDate // Simpan tanggal
+                showDatePicker = false
+                showTimePicker = true // Menampilkan TimePicker setelah memilih tanggal
+            },
+            onDismiss = { showDatePicker = false }
+        )
+    }
+
+    // Tampilkan TimePickerDialog saat showTimePicker = true
+    if (showTimePicker) {
+        TimePickerDialogWithTime(
+            onTimeSelected = { selectedTime ->
+                // Gabungkan tanggal dan waktu untuk datetime
+                val datetime = "${datetimeState.value} $selectedTime"
+                datetimeState.value = datetime // Update datetime dengan waktu
+                viewModel.updateInsertPndState(
+                    viewModel.uiStateEdit.insertPndUiEvent.copy(tglPendapatan = datetime)
+                )
+                showTimePicker = false // Menyembunyikan TimePicker setelah waktu dipilih
+            },
+            onDismiss = { showTimePicker = false }
+        )
+    }
+}
