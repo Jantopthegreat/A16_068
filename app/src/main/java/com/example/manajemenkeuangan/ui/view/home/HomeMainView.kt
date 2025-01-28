@@ -55,7 +55,304 @@ object DestinasiHomeMain : DestinasiNavigasi {
     override val titleRes = "HomeMain"
 }
 
+@Composable
+fun HomeMainView(
+    onKelolaPendapatan: () -> Unit = {},
+    onKelolaPengeluaran: () -> Unit = {},
+    onKelolaAset: () -> Unit = {},
+    onKelolaKategori: () -> Unit = {},
+    homeMainViewModel: HomeMainViewModel = viewModel(factory = PenyediaViewModel.Factory)
+) {
+    val saldoUiState by homeMainViewModel.saldoUiState
+    val currentTime = remember { getCurrentTimeOfDay() }
+    val greeting = "Selamat $currentTime,"
+    val name = "Fauzan Althaf Rianto"
 
+    LaunchedEffect(Unit) {
+        homeMainViewModel.getSaldoData()
+    }
+
+    Scaffold() {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .clip(RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp))
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.background1),
+                    contentDescription = "Background Image",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp)),
+                    alignment = Alignment.Center,
+                    contentScale = ContentScale.Crop
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.TopStart
+            ) {
+                when (saldoUiState) {
+                    is HomeMainUiState.Loading -> CircularProgressIndicator()
+                    is HomeMainUiState.Success -> {
+                        val totalSaldo = (saldoUiState as HomeMainUiState.Success).totalSaldo
+                        val totalPendapatan = (saldoUiState as HomeMainUiState.Success).totalPendapatan
+                        val totalPengeluaran = (saldoUiState as HomeMainUiState.Success).totalPengeluaran
+
+                        val saldoColor = if (totalSaldo >= 0) {
+                            Color(0xFF4CAF50)
+                        } else {
+                            Color(0xFFF44336)
+                        }
+
+                        Column(
+                            horizontalAlignment = Alignment.Start,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        ) {
+                            Row (
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column (
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(
+                                        text = greeting,
+                                        fontFamily = groteskFont,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 20.sp,
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
+
+                                    Text(
+                                        text = name,
+                                        fontFamily = groteskFont,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 25.sp,
+                                        modifier = Modifier.padding(bottom = 16.dp)
+                                    )
+                                }
+                                Image(
+                                    painter = painterResource(id = R.drawable.logo),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .offset(x = (20).dp)
+                                        .align(Alignment.CenterVertically)
+                                )
+                            }
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier
+                            ) {
+                                Column(
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 10.dp)
+                                ) {
+                                    Text(
+                                        text = "Saldo",
+                                        fontFamily = groteskFont,
+                                        style = MaterialTheme.typography.headlineMedium.copy(color = Color.White),
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = if (totalSaldo >= 0) "+ IDR $totalSaldo" else "- IDR ${totalSaldo.absoluteValue}",
+                                        color = saldoColor,
+                                        fontFamily = zodiakFont,
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.displaySmall.copy(color = saldoColor),
+                                    )
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(
+                                            Color.White,
+                                            shape = RoundedCornerShape(20.dp)
+                                        )
+                                        .padding(10.dp)
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(100.dp)
+                                                .clip(MaterialTheme.shapes.medium)
+                                        ) {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.greencard),
+                                                contentDescription = "",
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .clip(MaterialTheme.shapes.medium),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                            Column(
+                                                verticalArrangement = Arrangement.Center,
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.fillMaxSize().padding(8.dp)
+                                            ) {
+                                                Row (
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.Center
+                                                ){
+                                                    Icon(
+                                                        painter = painterResource(id = R.drawable.ic_add),
+                                                        contentDescription = null,
+                                                        tint = Color.White,
+                                                        modifier = Modifier.padding(5.dp).size(20.dp)
+                                                    )
+                                                    Text(
+                                                        text = "Pendapatan",
+                                                        style = MaterialTheme.typography.headlineMedium.copy(
+                                                            color = Color.White
+                                                        ),
+                                                        fontSize = 15.sp
+                                                    )
+                                                }
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                                Text(
+                                                    text = "+ IDR $totalPendapatan",
+                                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                                        color = Color.White
+                                                    ),
+                                                    fontSize = 20.sp
+                                                )
+                                            }
+                                        }
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(100.dp)
+                                                .clip(MaterialTheme.shapes.medium)
+                                        ) {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.redcard),
+                                                contentDescription = "",
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .clip(MaterialTheme.shapes.medium),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                            Column(
+                                                verticalArrangement = Arrangement.Center,
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.fillMaxSize().padding(8.dp)
+                                            ) {
+                                                Row (
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.Center
+                                                ){
+                                                    Icon(
+                                                        painter = painterResource(id = R.drawable.ic_min),
+                                                        contentDescription = null,
+                                                        tint = Color.White,
+                                                        modifier = Modifier.padding(5.dp).size(20.dp)
+                                                    )
+                                                    Text(
+                                                        text = "Pengeluaran",
+                                                        style = MaterialTheme.typography.headlineMedium.copy(
+                                                            color = Color.White
+                                                        ),
+                                                        fontSize = 15.sp
+                                                    )
+                                                }
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                                Text(
+                                                    text = "- IDR $totalPengeluaran",
+                                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                                        color = Color.White
+                                                    ),
+                                                    fontSize = 20.sp
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Column (
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ){
+                                Row (
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ){
+                                    MenuCard(
+                                        title = "Kelola Pendapatan",
+                                        imageRes = R.drawable.income,
+                                        onClick = onKelolaPendapatan,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    MenuCard(
+                                        title = "Kelola Pengeluaran",
+                                        imageRes = R.drawable.outcome,
+                                        onClick = onKelolaPengeluaran,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                                Row (
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ){
+                                    MenuCard(
+                                        title = "Kelola         Aset",
+                                        imageRes = R.drawable.assets,
+                                        onClick = onKelolaAset,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    MenuCard(
+                                        title = "Kelola Kategori",
+                                        imageRes = R.drawable.category,
+                                        onClick = onKelolaKategori,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    is HomeMainUiState.Error -> Text(
+                        text = "Gagal memuat data saldo",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+    }
+}
+
+fun getCurrentTimeOfDay(): String {
+    val hour = LocalTime.now().hour
+    return when {
+        hour in 5..10 -> "Pagi"
+        hour in 11..14 -> "Siang"
+        hour in 15..17 -> "Sore"
+        else -> "Malam"
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
